@@ -44,6 +44,9 @@ test = [
     "pytest-cov",
 ]
 
+[project.scripts]
+template-mcp = "template_mcp.main:sync_main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
