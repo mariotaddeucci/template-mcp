@@ -1,15 +1,50 @@
 """Main entry point for the Template MCP server."""
 
-import logging
+import asyncio
+import os
+import sys
+from pathlib import Path
 
-logger = logging.getLogger(__name__)
+from .config import load_config
+from .logging import setup_logging, log_startup, log_shutdown
+from .server import run_server
 
 
-def main():
+async def main() -> None:
     """Main entry point for the Template MCP server."""
-    logging.basicConfig(level=logging.INFO)
-    logger.info("Hello from template-mcp!")
+    try:
+        # Load configuration
+        environment = os.getenv("ENVIRONMENT", "development")
+        config = load_config(environment)
+        
+        # Setup logging
+        setup_logging(config.logging)
+        
+        # Log startup
+        log_startup(
+            config.mcp_server.name,
+            config.mcp_server.version,
+            config.mcp_server.port,
+        )
+        
+        # Run the server
+        await run_server(config)
+        
+    except KeyboardInterrupt:
+        print("\nReceived interrupt signal")
+    except Exception as e:
+        print(f"Failed to start server: {e}", file=sys.stderr)
+        sys.exit(1)
+    finally:
+        # Log shutdown
+        if 'config' in locals():
+            log_shutdown(config.mcp_server.name)
+
+
+def sync_main() -> None:
+    """Synchronous wrapper for the main async function."""
+    asyncio.run(main())
 
 
 if __name__ == "__main__":
-    main()
+    sync_main()
