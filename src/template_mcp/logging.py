@@ -3,18 +3,18 @@
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 import structlog
 from loguru import logger
 
 from .config import LoggingConfig
-from .models import AuditLogEntry, LogLevel
+from .models import AuditLogEntry
 
 
 class LoguruHandler(logging.Handler):
     """Handler to bridge Python's logging to loguru."""
-    
+
     def emit(self, record: logging.LogRecord) -> None:
         """Emit a log record using loguru."""
         # Get corresponding loguru level if it exists
@@ -53,7 +53,7 @@ def setup_logging(config: LoggingConfig) -> None:
     """Setup logging configuration using loguru and structlog."""
     # Remove default loguru handler
     logger.remove()
-    
+
     # Setup console logging if enabled
     if config.console_enabled:
         if config.format == "json":
@@ -69,18 +69,18 @@ def setup_logging(config: LoggingConfig) -> None:
                 sys.stdout,
                 level=config.level.upper(),
                 format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
-                       "<level>{level: <8}</level> | "
-                       "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
-                       "<level>{message}</level>",
+                "<level>{level: <8}</level> | "
+                "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
+                "<level>{message}</level>",
                 enqueue=True,
             )
-    
+
     # Setup file logging if enabled
     if config.file_enabled:
         # Ensure log directory exists
         log_path = Path(config.file_path)
         log_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         logger.add(
             config.file_path,
             level=config.level.upper(),
@@ -91,10 +91,10 @@ def setup_logging(config: LoggingConfig) -> None:
             serialize=True,
             enqueue=True,
         )
-    
+
     # Bridge Python's logging to loguru
     logging.basicConfig(handlers=[LoguruHandler()], level=0, force=True)
-    
+
     # Setup structlog
     setup_structlog()
 
@@ -112,21 +112,21 @@ def get_structured_logger(name: str) -> Any:
 
 class AuditLogger:
     """Specialized logger for audit events."""
-    
+
     def __init__(self):
         """Initialize audit logger."""
         self._logger = get_logger("audit")
         self._structured_logger = get_structured_logger("audit")
-    
+
     def log_tool_execution(
         self,
         tool_name: str,
-        user_id: Optional[str],
-        user_role: Optional[str],
+        user_id: str | None,
+        user_role: str | None,
         result: str,
-        execution_time_ms: Optional[float] = None,
-        error_message: Optional[str] = None,
-        **kwargs: Any
+        execution_time_ms: float | None = None,
+        error_message: str | None = None,
+        **kwargs: Any,
     ) -> None:
         """Log tool execution for audit purposes."""
         audit_data = {
@@ -137,25 +137,18 @@ class AuditLogger:
             "result": result,
             "execution_time_ms": execution_time_ms,
             "error_message": error_message,
-            **kwargs
+            **kwargs,
         }
-        
+
         self._structured_logger.info("Tool execution", **audit_data)
-        
+
         # Also log via regular logger for file output
         self._logger.info(
-            f"Tool execution: {tool_name} by {user_id or 'anonymous'} "
-            f"({user_role or 'unknown'}) - {result}"
+            f"Tool execution: {tool_name} by {user_id or 'anonymous'} ({user_role or 'unknown'}) - {result}"
         )
-    
+
     def log_authorization_check(
-        self,
-        user_id: Optional[str],
-        user_role: Optional[str],
-        resource: str,
-        action: str,
-        result: str,
-        **kwargs: Any
+        self, user_id: str | None, user_role: str | None, resource: str, action: str, result: str, **kwargs: Any
     ) -> None:
         """Log authorization check for audit purposes."""
         audit_data = {
@@ -165,36 +158,25 @@ class AuditLogger:
             "resource": resource,
             "action": action,
             "result": result,
-            **kwargs
+            **kwargs,
         }
-        
+
         self._structured_logger.info("Authorization check", **audit_data)
-        
+
         self._logger.info(
             f"Authorization check: {user_id or 'anonymous'} "
             f"({user_role or 'unknown'}) {action} on {resource} - {result}"
         )
-    
-    def log_server_event(
-        self,
-        event_type: str,
-        description: str,
-        **kwargs: Any
-    ) -> None:
+
+    def log_server_event(self, event_type: str, description: str, **kwargs: Any) -> None:
         """Log server events for audit purposes."""
-        audit_data = {
-            "event_type": event_type,
-            "description": description,
-            **kwargs
-        }
-        
+        audit_data = {"event_type": event_type, "description": description, **kwargs}
+
         self._structured_logger.info("Server event", **audit_data)
         self._logger.info(f"Server event: {event_type} - {description}")
-    
+
     def log_audit_entry(self, entry: AuditLogEntry) -> None:
         """Log a complete audit entry."""
-        audit_data = entry.model_dump()
-        
         self._structured_logger.info(
             "Audit entry",
             event_id=entry.event_id,
@@ -208,7 +190,7 @@ class AuditLogger:
             ip_address=entry.ip_address,
             additional_data=entry.additional_data,
         )
-        
+
         self._logger.info(
             f"Audit: {entry.event_type} - {entry.user_id or 'anonymous'} "
             f"{entry.action} on {entry.resource} - {entry.result}"
@@ -216,7 +198,7 @@ class AuditLogger:
 
 
 # Global audit logger instance
-_audit_logger: Optional[AuditLogger] = None
+_audit_logger: AuditLogger | None = None
 
 
 def get_audit_logger() -> AuditLogger:

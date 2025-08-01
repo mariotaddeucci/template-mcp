@@ -2,14 +2,14 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class ToolStatus(str, Enum):
     """Tool execution status."""
-    
+
     SUCCESS = "success"
     ERROR = "error"
     PENDING = "pending"
@@ -17,7 +17,7 @@ class ToolStatus(str, Enum):
 
 class LogLevel(str, Enum):
     """Log levels."""
-    
+
     DEBUG = "debug"
     INFO = "info"
     WARNING = "warning"
@@ -27,7 +27,7 @@ class LogLevel(str, Enum):
 
 class UserRole(str, Enum):
     """User roles for authorization."""
-    
+
     ADMIN = "admin"
     USER = "user"
     GUEST = "guest"
@@ -35,13 +35,13 @@ class UserRole(str, Enum):
 
 class ToolRequest(BaseModel):
     """Model for tool execution requests."""
-    
+
     tool_name: str = Field(..., description="Name of the tool to execute", min_length=1, max_length=100)
-    parameters: Dict[str, Any] = Field(default_factory=dict, description="Tool parameters")
-    user_id: Optional[str] = Field(None, description="ID of the user making the request", max_length=255)
+    parameters: dict[str, Any] = Field(default_factory=dict, description="Tool parameters")
+    user_id: str | None = Field(None, description="ID of the user making the request", max_length=255)
     user_role: UserRole = Field(default=UserRole.GUEST, description="Role of the user making the request")
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="Request timestamp")
-    
+
     @field_validator("tool_name")
     @classmethod
     def validate_tool_name(cls, v: str) -> str:
@@ -53,32 +53,38 @@ class ToolRequest(BaseModel):
 
 class ToolResponse(BaseModel):
     """Model for tool execution responses."""
-    
+
     tool_name: str = Field(..., description="Name of the executed tool")
     status: ToolStatus = Field(..., description="Execution status")
-    result: Optional[Any] = Field(None, description="Tool execution result")
-    error_message: Optional[str] = Field(None, description="Error message if execution failed")
-    execution_time_ms: Optional[float] = Field(None, description="Execution time in milliseconds", ge=0)
+    result: Any | None = Field(None, description="Tool execution result")
+    error_message: str | None = Field(None, description="Error message if execution failed")
+    execution_time_ms: float | None = Field(None, description="Execution time in milliseconds", ge=0)
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="Response timestamp")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
-    
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+
     @field_validator("error_message")
     @classmethod
-    def validate_error_message(cls, v: Optional[str], info) -> Optional[str]:
+    def validate_error_message(cls, v: str | None, info) -> str | None:
         """Ensure error message is present when status is ERROR."""
-        status = info.data.get("status")
-        if status == ToolStatus.ERROR and not v:
+        if hasattr(info, "data") and info.data and info.data.get("status") == ToolStatus.ERROR and not v:
             raise ValueError("Error message is required when status is ERROR")
         return v
+
+    @model_validator(mode="after")
+    def validate_error_status(self) -> "ToolResponse":
+        """Ensure error message is provided when status is ERROR."""
+        if self.status == ToolStatus.ERROR and not self.error_message:
+            raise ValueError("Error message is required when status is ERROR")
+        return self
 
 
 class HelloRequest(BaseModel):
     """Model for hello tool request parameters."""
-    
+
     name: str = Field(..., description="Name to greet", min_length=1, max_length=100)
     language: str = Field(default="en", description="Language for greeting", pattern="^[a-z]{2}$")
     format: str = Field(default="plain", description="Response format", pattern="^(plain|json|html)$")
-    
+
     @field_validator("name")
     @classmethod
     def validate_name(cls, v: str) -> str:
@@ -92,7 +98,7 @@ class HelloRequest(BaseModel):
 
 class HelloResponse(BaseModel):
     """Model for hello tool response."""
-    
+
     greeting: str = Field(..., description="Generated greeting message")
     name: str = Field(..., description="Name that was greeted")
     language: str = Field(..., description="Language used for greeting")
@@ -101,19 +107,19 @@ class HelloResponse(BaseModel):
 
 class AuditLogEntry(BaseModel):
     """Model for audit log entries."""
-    
+
     event_id: str = Field(..., description="Unique event identifier")
     event_type: str = Field(..., description="Type of event", max_length=50)
-    user_id: Optional[str] = Field(None, description="User identifier", max_length=255)
-    user_role: Optional[UserRole] = Field(None, description="User role")
+    user_id: str | None = Field(None, description="User identifier", max_length=255)
+    user_role: UserRole | None = Field(None, description="User role")
     resource: str = Field(..., description="Resource accessed", max_length=255)
     action: str = Field(..., description="Action performed", max_length=50)
     result: str = Field(..., description="Action result", max_length=20)
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="Event timestamp")
-    ip_address: Optional[str] = Field(None, description="Client IP address", max_length=45)
-    user_agent: Optional[str] = Field(None, description="Client user agent", max_length=500)
-    additional_data: Dict[str, Any] = Field(default_factory=dict, description="Additional event data")
-    
+    ip_address: str | None = Field(None, description="Client IP address", max_length=45)
+    user_agent: str | None = Field(None, description="Client user agent", max_length=500)
+    additional_data: dict[str, Any] = Field(default_factory=dict, description="Additional event data")
+
     @field_validator("result")
     @classmethod
     def validate_result(cls, v: str) -> str:
@@ -126,7 +132,7 @@ class AuditLogEntry(BaseModel):
 
 class ServerInfo(BaseModel):
     """Model for server information."""
-    
+
     name: str = Field(..., description="Server name")
     version: str = Field(..., description="Server version")
     status: str = Field(..., description="Server status")
@@ -134,8 +140,8 @@ class ServerInfo(BaseModel):
     total_requests: int = Field(default=0, description="Total number of requests processed", ge=0)
     active_connections: int = Field(default=0, description="Number of active connections", ge=0)
     last_restart: datetime = Field(default_factory=datetime.utcnow, description="Last server restart time")
-    capabilities: List[str] = Field(default_factory=list, description="Server capabilities")
-    
+    capabilities: list[str] = Field(default_factory=list, description="Server capabilities")
+
     @field_validator("status")
     @classmethod
     def validate_status(cls, v: str) -> str:
@@ -148,15 +154,15 @@ class ServerInfo(BaseModel):
 
 class ErrorDetails(BaseModel):
     """Model for detailed error information."""
-    
+
     error_code: str = Field(..., description="Error code", max_length=20)
     error_message: str = Field(..., description="Human-readable error message")
     error_type: str = Field(..., description="Type/category of error", max_length=50)
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="Error timestamp")
-    correlation_id: Optional[str] = Field(None, description="Request correlation ID", max_length=100)
-    stack_trace: Optional[str] = Field(None, description="Stack trace for debugging")
-    context: Dict[str, Any] = Field(default_factory=dict, description="Additional error context")
-    
+    correlation_id: str | None = Field(None, description="Request correlation ID", max_length=100)
+    stack_trace: str | None = Field(None, description="Stack trace for debugging")
+    context: dict[str, Any] = Field(default_factory=dict, description="Additional error context")
+
     @field_validator("error_code")
     @classmethod
     def validate_error_code(cls, v: str) -> str:
