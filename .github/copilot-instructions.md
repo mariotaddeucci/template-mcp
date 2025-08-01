@@ -25,14 +25,14 @@ This project is a secure MCP (Model Context Protocol) server using FastMCP and E
 ## Workflow and Task Management
 
 ### Pre-Task Checklist
-Before starting tasks from `./Task.md`:
+Before starting tasks:
 1. Check for existing approved PRs related to your intended work
 2. Review open issues to avoid duplication of effort
 3. If approved PRs exist, perform squash merge using GitHub MCP tools
 4. Update local branch with latest changes from main branch
 
 ### Task Execution Rules
-- **One task at a time**: Execute only one task from `./Task.md` at a time
+- **One task at a time**: Execute only one task at a time
 - **Complete verification**: Ensure all steps are successfully completed before marking task as done
 - **Use GitHub MCP**: Utilize GitHub MCP tools for opening issues and pull requests
 
