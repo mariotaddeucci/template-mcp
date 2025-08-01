@@ -6,6 +6,21 @@ This project is a secure MCP (Model Context Protocol) server using FastMCP and E
 ## Package Management
 - **Use uv**: Use `uv` as the package manager for all Python dependencies and tool installations
 - **Python Version**: Requires Python >= 3.12 as specified in pyproject.toml
+- **Ruff**: Use Ruff as the official formatter and linter for code quality and consistency
+- **Taskipy**: Use Taskipy with uv for task automation via `uv run task <task-name>`
+
+## Development Tools
+
+### Code Quality
+- **Ruff as Formatter**: Use `uv run ruff format` to format code according to project standards
+- **Ruff as Linter**: Use `uv run ruff check` to lint code and catch potential issues
+- **Pre-commit integration**: Ruff should be configured to run before commits for consistent code quality
+
+### Task Automation
+- **Taskipy integration**: Use Taskipy for common development tasks
+- **Task execution**: Run tasks using `uv run task <task-name>` format
+- **Common tasks**: Examples include `uv run task lint`, `uv run task format`, `uv run task test`
+- **Custom tasks**: Define project-specific tasks in pyproject.toml under `[tool.taskipy.tasks]`
 
 ## Workflow and Task Management
 
@@ -35,7 +50,7 @@ Follow conventional commits format with English messages:
 
 **Types**:
 - `feat`: New features
-- `fix`: Bug fixes  
+- `fix`: Bug fixes
 - `docs`: Documentation changes
 - `style`: Code style changes (formatting, etc.)
 - `refactor`: Code refactoring
