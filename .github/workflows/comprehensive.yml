@@ -1,0 +1,178 @@
+name: Complete Test Suite
+
+on:
+  # Manual trigger for comprehensive testing
+  workflow_dispatch:
+  # Weekly scheduled run
+  schedule:
+    - cron: '0 6 * * 1'  # Every Monday at 6 AM UTC
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  comprehensive-checks:
+    name: Comprehensive Quality Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
+    - name: Set up Python
+      run: |
+        echo "🐍 Setting up Python ${{ env.PYTHON_VERSION }} for comprehensive checks"
+        uv python install ${{ env.PYTHON_VERSION }}
+        python --version
+        echo "🔧 Python environment ready"
+
+    - name: Install dependencies
+      run: |
+        echo "📦 Installing all project dependencies (comprehensive mode)"
+        uv sync --all-extras --verbose
+        echo "📋 Listing installed packages:"
+        uv pip list
+        echo "✅ All dependencies installed successfully"
+
+    - name: Run pre-commit checks
+      run: |
+        echo "🔍 Running comprehensive pre-commit verification"
+        echo "This includes: formatting, linting, security, and tests"
+        echo "Command: uv run task pre-commit"
+        uv run task pre-commit --verbose
+        echo "✅ All pre-commit checks passed"
+
+  security-comprehensive:
+    name: Comprehensive Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
+    - name: Set up Python
+      run: |
+        echo "🐍 Setting up Python ${{ env.PYTHON_VERSION }} for security scanning"
+        uv python install ${{ env.PYTHON_VERSION }}
+        python --version
+
+    - name: Install dependencies
+      run: |
+        echo "📦 Installing dependencies for security analysis"
+        uv sync --all-extras --verbose
+        echo "✅ Dependencies ready for security scanning"
+
+    - name: Run comprehensive security scan
+      run: |
+        echo "🛡️  Starting comprehensive security analysis"
+        echo "This scan includes multiple security rulesets and vulnerability checks"
+        echo "Command: uv run task security-full"
+        uv run task security-full --verbose
+        echo "✅ Comprehensive security scan completed"
+      continue-on-error: true  # Allow this to fail since it's comprehensive
+      env:
+        SEMGREP_SEND_METRICS: "off"
+
+  test-coverage:
+    name: Enhanced Test Coverage
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
+    - name: Set up Python
+      run: |
+        echo "🐍 Setting up Python ${{ env.PYTHON_VERSION }} for enhanced testing"
+        uv python install ${{ env.PYTHON_VERSION }}
+        python --version
+
+    - name: Install dependencies
+      run: |
+        echo "📦 Installing dependencies for enhanced testing"
+        uv sync --all-extras --verbose
+        echo "✅ Test environment ready"
+
+    - name: Run tests with detailed coverage
+      run: |
+        echo "🧪 Running comprehensive test suite with detailed coverage"
+        echo "Command: uv run task test-cov"
+        uv run task test-cov --verbose
+        echo "📊 Test execution completed"
+
+    - name: Generate coverage badge
+      run: |
+        echo "🏷️  Generating coverage badge"
+        coverage-badge -o coverage.svg || echo "⚠️ Coverage badge generation skipped (optional)"
+
+    - name: Display coverage stats
+      run: |
+        echo "📈 Coverage Statistics:"
+        if [ -f .coverage ]; then
+          python -m coverage report --show-missing
+        else
+          echo "⚠️ No coverage data found"
+        fi
+
+    - name: Archive coverage results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-report
+        path: |
+          htmlcov/
+          coverage.svg
+        retention-days: 30
+
+  matrix-testing:
+    name: Matrix Testing
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+        task: [test, lint, format-check]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
+    - name: Set up Python ${{ matrix.python-version }}
+      run: |
+        echo "🐍 Setting up Python ${{ matrix.python-version }} for matrix testing"
+        uv python install ${{ matrix.python-version }}
+        python --version
+
+    - name: Install dependencies
+      run: |
+        echo "📦 Installing dependencies for Python ${{ matrix.python-version }}"
+        uv sync --all-extras --verbose
+        echo "✅ Dependencies installed for Python ${{ matrix.python-version }}"
+
+    - name: Run ${{ matrix.task }} on Python ${{ matrix.python-version }}
+      run: |
+        echo "🔧 Running ${{ matrix.task }} on Python ${{ matrix.python-version }}"
+        echo "Command: uv run task ${{ matrix.task }}"
+        uv run task ${{ matrix.task }} --verbose
+        echo "✅ ${{ matrix.task }} completed successfully on Python ${{ matrix.python-version }}"

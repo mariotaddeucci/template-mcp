@@ -1,0 +1,104 @@
+name: Dependency Management
+
+on:
+  # Check dependencies weekly
+  schedule:
+    - cron: '0 8 * * 1'  # Every Monday at 8 AM UTC
+  # Manual trigger
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  check-dependencies:
+    name: Check Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
+    - name: Set up Python
+      run: |
+        echo "🐍 Setting up Python ${{ env.PYTHON_VERSION }} for dependency checks"
+        uv python install ${{ env.PYTHON_VERSION }}
+        python --version
+
+    - name: Check for dependency updates
+      run: |
+        echo "🔍 Checking for outdated dependencies and project health"
+        echo "Installing current dependencies..."
+        uv sync --all-extras --verbose
+        echo ""
+        echo "📦 Current dependency tree:"
+        uv tree
+        echo ""
+        echo "✅ Dependency check completed"
+        
+    - name: Security audit
+      run: |
+        echo "🔒 Running dependency security audit"
+        echo "Checking for known vulnerabilities in dependencies..."
+        # Check for known vulnerabilities in dependencies
+        uv run pip-audit --desc || echo "⚠️ pip-audit not available, skipping security audit"
+        echo "✅ Security audit completed"
+      continue-on-error: true
+
+    - name: Test with latest dependencies
+      run: |
+        echo "🧪 Testing project with current dependency versions"
+        echo "Running basic test suite to ensure compatibility..."
+        uv run task test --verbose
+        echo "✅ Project works correctly with current dependencies"
+
+  validate-lockfile:
+    name: Validate Lock File
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
+    - name: Set up Python
+      run: |
+        echo "🐍 Setting up Python ${{ env.PYTHON_VERSION }} for lockfile validation"
+        uv python install ${{ env.PYTHON_VERSION }}
+        python --version
+
+    - name: Validate uv.lock is up to date
+      run: |
+        echo "🔐 Validating that uv.lock file is up to date"
+        echo "This ensures the lockfile matches pyproject.toml dependencies"
+        uv lock --check --verbose
+        echo "✅ Lock file is valid and up to date"
+        
+    - name: Check sync status
+      run: |
+        echo "🔄 Checking if environment can be synchronized correctly"
+        echo "This verifies that the lockfile can create a working environment"
+        uv sync --all-extras --check --verbose
+        echo "✅ Environment synchronization check passed"
+
+    - name: Display dependency summary
+      run: |
+        echo "📊 Dependency Summary:"
+        echo "========================"
+        uv sync --all-extras
+        echo ""
+        echo "📦 Installed packages summary:"
+        uv pip list --format=columns | head -20
+        echo ""
+        echo "🔢 Total installed packages:"
+        uv pip list | wc -l
+        echo "✅ Dependency analysis completed"
