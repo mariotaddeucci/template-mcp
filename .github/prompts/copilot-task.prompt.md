@@ -1,46 +1,43 @@
+````markdown
 # GitHub Copilot Task Execution Prompt
 
 ## 🎯 **Objetivo Geral**
 Implementar a primeira tarefa pendente do projeto MCP Secure Server: **Setup e Configuração Inicial**, especificamente a inicialização do projeto com uv e configuração do `pyproject.toml`.
 
 ## 📋 **Tarefa Específica a Executar**
-**Inicializar projeto com uv**: Configurar `pyproject.toml` com todas as dependências necessárias para o desenvolvimento do servidor MCP seguro.
+**Inicializar projeto com uv**: `uv init mcp-secure-server` e configurar `pyproject.toml` com todas as dependências necessárias para o desenvolvimento do servidor MCP seguro com Eunomia Authorization.
 
 ## 🔍 **Contexto do Projeto**
-- **Projeto**: Servidor MCP (Model Context Protocol) seguro com FastMCP
-- **Framework Stack**: FastMCP + Pydantic + JWT + pytest
+- **Projeto**: Servidor MCP (Model Context Protocol) seguro com FastMCP e Eunomia Authorization
+- **Framework Stack**: FastMCP + Eunomia Authorization + Pydantic + pytest
 - **Gerenciador de Pacotes**: uv (conforme instruções do projeto)
-- **Foco**: Segurança, autenticação, autorização granular
+- **Foco**: Controle de acesso granular através do Eunomia - o sistema oficial de autorização do FastMCP
 
 ## 📦 **Dependências Requeridas**
 
 ### Core Dependencies
 ```
 fastmcp>=0.1.0              # Framework base para servidor MCP
+eunomia-mcp                 # Sistema oficial de autorização do FastMCP
 pydantic>=2.0.0             # Validação de dados e schemas
-python-jose[cryptography]   # JWT e autenticação
-python-multipart            # Suporte a multipart forms
-uvicorn[standard]           # ASGI server
+python-dotenv               # Gerenciamento de variáveis de ambiente
 ```
 
-### Security & Auth
+### Testing & Quality
 ```
-passlib[bcrypt]             # Hashing de senhas
-python-dotenv               # Gerenciamento de variáveis de ambiente
-cryptography                # Operações criptográficas
+pytest>=7.0.0               # Framework de testes
+pytest-asyncio             # Testes assíncronos para FastMCP
+pytest-cov                 # Cobertura de testes
 ```
 
 ### Logging & Monitoring
 ```
-loguru                      # Logging estruturado e auditoria
-prometheus-client           # Métricas e monitoramento
+loguru                      # Logging estruturado para auditoria
+structlog                   # Logging estruturado alternativo (conforme Task.md)
 ```
 
 ### Development Dependencies
 ```
-pytest>=7.0.0               # Framework de testes
-pytest-asyncio             # Testes assíncronos
-pytest-cov                 # Cobertura de testes
 black                      # Formatação de código
 isort                      # Organização de imports
 flake8                     # Linting
@@ -53,7 +50,6 @@ pre-commit                 # Hooks de commit
 src/
 ├── mcp_secure_server/
 │   ├── __init__.py
-│   ├── auth/
 │   ├── core/
 │   ├── models/
 │   ├── tools/
@@ -106,14 +102,14 @@ examples/
 [project]
 name = "mcp-secure-server"
 version = "0.1.0"
-description = "Servidor MCP seguro com FastMCP e controle de acesso granular"
+description = "Servidor MCP seguro com FastMCP e Eunomia Authorization - controle de acesso granular com políticas JSON dinâmicas"
 authors = [
     {name = "Your Name", email = "your.email@domain.com"}
 ]
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.9"
-keywords = ["mcp", "fastmcp", "security", "auth", "server"]
+keywords = ["mcp", "fastmcp", "eunomia", "authorization", "security", "server"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -126,15 +122,25 @@ classifiers = [
 ]
 
 dependencies = [
-    # Core dependencies aqui
+    "fastmcp>=0.1.0",
+    "eunomia-mcp",
+    "pydantic>=2.0.0",
+    "python-dotenv",
+    "loguru",
 ]
 
 [project.optional-dependencies]
 dev = [
-    # Development dependencies aqui
+    "black",
+    "isort",
+    "flake8",
+    "mypy",
+    "pre-commit",
 ]
 test = [
-    # Test dependencies aqui
+    "pytest>=7.0.0",
+    "pytest-asyncio",
+    "pytest-cov",
 ]
 
 [build-system]
@@ -144,16 +150,17 @@ build-backend = "hatchling.build"
 
 ## 🔄 **Próximos Passos (NÃO EXECUTAR AGORA)**
 Após completar esta tarefa, a próxima será:
-- **Instalar dependências base**: `uv add` das dependências principais
-- **Configurar estrutura de diretórios**: Criar estrutura completa
-- **Setup de ambiente**: Configurar variáveis de ambiente
+- **Instalar dependências base**: `uv add fastmcp eunomia-mcp pydantic pytest pytest-asyncio`
+- **Setup servidor Eunomia**: Rodar servidor Eunomia via Docker: `docker run -d -p 8000:8000 ttommitt/eunomia-server:latest`
+- **Configurar estrutura de diretórios**: Criar `src/`, `tests/`, `docs/`, `configs/` e `examples/`
+- **Setup de ambiente**: Configurar variáveis de ambiente para desenvolvimento, teste e produção
 
 ## 💡 **Dicas de Implementação**
-1. **Comece simples**: Configure primeiro as dependências core
+1. **Comece simples**: Configure primeiro as dependências core (fastmcp, eunomia-mcp, pydantic)
 2. **Valide incrementalmente**: Teste a instalação a cada grupo de dependências
-3. **Use versões específicas**: Para dependências críticas de segurança
+3. **Foque no Eunomia**: Este é o sistema oficial de autorização do FastMCP
 4. **Documente mudanças**: Comente escolhas importantes no pyproject.toml
 
 ---
 
-**🤖 Copilot Instructions**: Execute apenas a tarefa especificada acima. Não prossiga para outras tarefas até que esta esteja 100% completa e validada. Use `uv` conforme as instruções do projeto.
+**🤖 Copilot Instructions**: Execute apenas a tarefa especificada acima. Não prossiga para outras tarefas até que esta esteja 100% completa e validada. Use `uv` conforme as instruções do projeto e foque na integração com Eunomia Authorization.
