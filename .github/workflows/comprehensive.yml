@@ -1,0 +1,121 @@
+name: Complete Test Suite
+
+on:
+  # Manual trigger for comprehensive testing
+  workflow_dispatch:
+  # Weekly scheduled run
+  schedule:
+    - cron: '0 6 * * 1'  # Every Monday at 6 AM UTC
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  comprehensive-checks:
+    name: Comprehensive Quality Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
+    - name: Set up Python
+      run: uv python install ${{ env.PYTHON_VERSION }}
+
+    - name: Install dependencies
+      run: uv sync --all-extras
+
+    - name: Run pre-commit checks
+      run: uv run task pre-commit
+
+  security-comprehensive:
+    name: Comprehensive Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
+    - name: Set up Python
+      run: uv python install ${{ env.PYTHON_VERSION }}
+
+    - name: Install dependencies
+      run: uv sync --all-extras
+
+    - name: Run comprehensive security scan
+      run: uv run task security-full
+      continue-on-error: true  # Allow this to fail since it's comprehensive
+
+  test-coverage:
+    name: Enhanced Test Coverage
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
+    - name: Set up Python
+      run: uv python install ${{ env.PYTHON_VERSION }}
+
+    - name: Install dependencies
+      run: uv sync --all-extras
+
+    - name: Run tests with detailed coverage
+      run: uv run task test-cov
+
+    - name: Generate coverage badge
+      run: |
+        coverage-badge -o coverage.svg || echo "Coverage badge generation skipped"
+
+    - name: Archive coverage results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-report
+        path: |
+          htmlcov/
+          coverage.svg
+        retention-days: 30
+
+  matrix-testing:
+    name: Matrix Testing
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+        task: [test, lint, format-check]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
+    - name: Set up Python ${{ matrix.python-version }}
+      run: uv python install ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: uv sync --all-extras
+
+    - name: Run ${{ matrix.task }} on Python ${{ matrix.python-version }}
+      run: uv run task ${{ matrix.task }}

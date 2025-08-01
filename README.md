@@ -41,6 +41,29 @@ template-mcp/
 └── pyproject.toml       # Configuração do projeto
 ```
 
+## 🔄 CI/CD Pipeline
+
+O projeto utiliza GitHub Actions para automação completa das verificações de código. Ver [documentação da pipeline](docs/ci-pipeline.md) para detalhes.
+
+### Verificações Automatizadas
+- ✅ Formatação de código (Ruff)
+- ✅ Linting e análise estática (Ruff)  
+- ✅ Varredura de segurança (Semgrep)
+- ✅ Testes com cobertura (pytest)
+- ✅ Execução paralela para performance otimizada
+
+### Comandos de Desenvolvimento
+```bash
+# Verificação completa local
+uv run task pre-commit
+
+# Verificações individuais
+uv run task format-check  # Verificar formatação
+uv run task lint          # Análise estática
+uv run task security      # Varredura de segurança
+uv run task test-cov      # Testes com cobertura
+```
+
 ## 🛠 Próximos Passos
 
 Ver [Task.md](Task.md) para a lista completa de tarefas pendentes.

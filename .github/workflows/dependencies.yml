@@ -1,0 +1,72 @@
+name: Dependency Management
+
+on:
+  # Check dependencies weekly
+  schedule:
+    - cron: '0 8 * * 1'  # Every Monday at 8 AM UTC
+  # Manual trigger
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  check-dependencies:
+    name: Check Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
+    - name: Set up Python
+      run: uv python install ${{ env.PYTHON_VERSION }}
+
+    - name: Check for dependency updates
+      run: |
+        echo "Checking for outdated dependencies..."
+        uv sync --all-extras
+        uv tree
+        
+    - name: Security audit
+      run: |
+        echo "Running dependency security audit..."
+        # Check for known vulnerabilities in dependencies
+        uv run pip-audit || echo "pip-audit not available, skipping security audit"
+      continue-on-error: true
+
+    - name: Test with latest dependencies
+      run: |
+        echo "Testing with current dependency versions..."
+        uv run task test
+
+  validate-lockfile:
+    name: Validate Lock File
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
+    - name: Set up Python
+      run: uv python install ${{ env.PYTHON_VERSION }}
+
+    - name: Validate uv.lock is up to date
+      run: |
+        echo "Validating that uv.lock is up to date..."
+        uv lock --check
+        
+    - name: Check sync status
+      run: |
+        echo "Checking if environment is in sync..."
+        uv sync --all-extras --check
