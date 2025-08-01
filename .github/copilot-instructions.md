@@ -75,6 +75,7 @@ test(security): add authorization policy tests
 - **Clear descriptions**: Explain changes made and reasoning
 - **Draft to ready**: Change draft PRs to "ready for review" status before approving and merging
 - **Request reviews**: Always request review before merging
+- **Draft to ready**: If approving a draft PR, always change it to "ready for review" before merging
 - **Squash merge**: Use squash merge to maintain clean commit history on main branch
 
 ## Language and Documentation Standards
