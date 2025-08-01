@@ -8,9 +8,9 @@ from uuid import uuid4
 
 from fastmcp import FastMCP
 from fastmcp.tools import Tool
-from eunomia_ai.mcp_middleware import EunomiaMcpMiddleware
 
 from .config import AppConfig, get_config
+from .eunomia_middleware import EunomiaAuthMiddleware
 from .logging import get_audit_logger, get_logger
 from .models import (
     HelloRequest,
@@ -40,8 +40,9 @@ class TemplateMcpServer:
             version=self.config.mcp_server.version,
         )
         
-        # Add Eunomia middleware integration in one line as required
-        self.app.add_middleware(EunomiaMcpMiddleware())
+        # Add Eunomia authorization middleware
+        eunomia_middleware = EunomiaAuthMiddleware(config=self.config)
+        self.app.add_middleware(eunomia_middleware)
         
         # Register tools
         self._register_tools()
@@ -52,41 +53,40 @@ class TemplateMcpServer:
     
     def _register_tools(self) -> None:
         """Register all available tools."""
-        # Register hello tool
-        hello_tool = Tool(
-            name="hello",
-            description="Simple greeting tool that says hello to a user",
-            input_schema=HelloRequest.model_json_schema(),
-        )
-        
-        @hello_tool.call
-        async def hello_handler(request: Dict[str, Any]) -> Dict[str, Any]:
-            """Handle hello tool requests."""
-            return await self._handle_hello_tool(request)
-        
-        self.app.add_tool(hello_tool)
-        
+        # Register hello tool using FastMCP decorator approach
+        @self.app.tool("hello")
+        async def hello_tool(name: str, language: str = "en", format: str = "text") -> str:
+            """Simple greeting tool that says hello to a user.
+            
+            Args:
+                name: The name of the person to greet
+                language: Language for the greeting (en, es, fr, de, pt, it)
+                format: Response format (text, json, html)
+            
+            Returns:
+                A greeting message in the specified language and format
+            """
+            return await self._handle_hello_tool({
+                "params": {
+                    "name": name,
+                    "language": language,
+                    "format": format
+                }
+            })
+
         # Register server info tool
-        info_tool = Tool(
-            name="server_info",
-            description="Get server information and status",
-            input_schema={
-                "type": "object",
-                "properties": {},
-                "additionalProperties": False,
-            },
-        )
-        
-        @info_tool.call
-        async def info_handler(request: Dict[str, Any]) -> Dict[str, Any]:
-            """Handle server info requests."""
-            return await self._handle_server_info_tool(request)
-        
-        self.app.add_tool(info_tool)
+        @self.app.tool("server_info")
+        async def server_info_tool() -> str:
+            """Get server information and status.
+            
+            Returns:
+                JSON string with server information
+            """
+            return await self._handle_server_info_tool({})
         
         self.logger.info("Registered tools: hello, server_info")
     
-    async def _handle_hello_tool(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_hello_tool(self, request: Dict[str, Any]) -> str:
         """Handle hello tool execution."""
         start_time = time.time()
         user_id = request.get("user_id")
@@ -118,7 +118,7 @@ class TemplateMcpServer:
             
             # Format response based on requested format
             if hello_request.format == "json":
-                result = hello_response.model_dump()
+                result = hello_response.model_dump_json()
             elif hello_request.format == "html":
                 result = f"<h1>{greeting}</h1><p>Welcome, <strong>{hello_request.name}</strong>!</p>"
             else:  # plain text
@@ -139,14 +139,7 @@ class TemplateMcpServer:
             
             self.request_count += 1
             
-            return {
-                "content": [
-                    {
-                        "type": "text",
-                        "text": result if isinstance(result, str) else str(result),
-                    }
-                ]
-            }
+            return result
             
         except Exception as e:
             execution_time = (time.time() - start_time) * 1000
@@ -162,17 +155,9 @@ class TemplateMcpServer:
                 error_message=error_msg,
             )
             
-            return {
-                "content": [
-                    {
-                        "type": "text",
-                        "text": f"Error: {error_msg}",
-                    }
-                ],
-                "isError": True,
-            }
+            return f"Error: {error_msg}"
     
-    async def _handle_server_info_tool(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_server_info_tool(self, request: Dict[str, Any]) -> str:
         """Handle server info tool execution."""
         start_time = time.time()
         user_id = request.get("user_id")
@@ -204,14 +189,7 @@ class TemplateMcpServer:
                 execution_time_ms=execution_time,
             )
             
-            return {
-                "content": [
-                    {
-                        "type": "text",
-                        "text": server_info.model_dump_json(indent=2),
-                    }
-                ]
-            }
+            return server_info.model_dump_json(indent=2)
             
         except Exception as e:
             execution_time = (time.time() - start_time) * 1000
@@ -227,15 +205,7 @@ class TemplateMcpServer:
                 error_message=error_msg,
             )
             
-            return {
-                "content": [
-                    {
-                        "type": "text",
-                        "text": f"Error: {error_msg}",
-                    }
-                ],
-                "isError": True,
-            }
+            return f"Error: {error_msg}"
     
     async def start_server(self) -> None:
         """Start the MCP server."""

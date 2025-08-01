@@ -1,29 +1,110 @@
 {
   "version": "1.0",
-  "policies": [
+  "name": "mcp_policies",
+  "description": "MCP authorization policies for Template MCP server with granular access control",
+  "default_effect": "deny",
+  "rules": [
     {
-      "id": "admin_policy",
-      "description": "Full access for administrators",
-      "subjects": ["admin"],
-      "actions": ["*"],
-      "resources": ["*"],
-      "effect": "allow"
+      "name": "admin_full_access",
+      "description": "Full access for administrators - all MCP operations",
+      "effect": "allow",
+      "actions": ["tools/list", "tools/call", "resources/list", "resources/read", "prompts/list", "prompts/get"],
+      "principal_conditions": [
+        {
+          "path": "attributes.role",
+          "operator": "equals",
+          "value": "admin"
+        }
+      ],
+      "resource_conditions": []
     },
     {
-      "id": "user_policy", 
-      "description": "Limited access for regular users",
-      "subjects": ["user"],
-      "actions": ["read", "list"],
-      "resources": ["tools/*", "resources/*"],
-      "effect": "allow"
+      "name": "user_tools_access",
+      "description": "Allow users to access specific tools and list all tools",
+      "effect": "allow", 
+      "actions": ["tools/list", "tools/call"],
+      "principal_conditions": [
+        {
+          "path": "attributes.role",
+          "operator": "equals",
+          "value": "user"
+        }
+      ],
+      "resource_conditions": []
     },
     {
-      "id": "guest_policy",
-      "description": "Read-only access for guests",
-      "subjects": ["guest"],
-      "actions": ["list"],
-      "resources": ["tools/hello"],
-      "effect": "allow"
+      "name": "user_resources_read",
+      "description": "Allow users to read public resources",
+      "effect": "allow",
+      "actions": ["resources/list", "resources/read"],
+      "principal_conditions": [
+        {
+          "path": "attributes.role", 
+          "operator": "equals",
+          "value": "user"
+        }
+      ],
+      "resource_conditions": [
+        {
+          "path": "attributes.resource_path",
+          "operator": "startswith",
+          "value": "public/"
+        }
+      ]
+    },
+    {
+      "name": "guest_hello_access",
+      "description": "Allow guests to access hello tool only",
+      "effect": "allow",
+      "actions": ["tools/list", "tools/call"],
+      "principal_conditions": [
+        {
+          "path": "attributes.role",
+          "operator": "equals", 
+          "value": "guest"
+        }
+      ],
+      "resource_conditions": [
+        {
+          "path": "attributes.tool_name",
+          "operator": "equals",
+          "value": "hello"
+        }
+      ]
+    },
+    {
+      "name": "guest_tools_list",
+      "description": "Allow guests to list available tools",
+      "effect": "allow",
+      "actions": ["tools/list"],
+      "principal_conditions": [
+        {
+          "path": "attributes.role",
+          "operator": "equals",
+          "value": "guest"
+        }
+      ],
+      "resource_conditions": []
+    },
+    {
+      "name": "deny_guest_server_info",
+      "description": "Explicitly deny guests from calling server info",
+      "effect": "deny",
+      "actions": ["tools/call"],
+      "principal_conditions": [
+        {
+          "path": "attributes.role",
+          "operator": "equals",
+          "value": "guest"
+        }
+      ],
+      "resource_conditions": [
+        {
+          "path": "attributes.tool_name",
+          "operator": "equals",
+          "value": "server_info"
+        }
+      ]
     }
   ]
 }

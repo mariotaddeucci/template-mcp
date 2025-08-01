@@ -11,6 +11,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class LoggingConfig(BaseSettings):
     """Logging configuration."""
     
+    model_config = SettingsConfigDict(
+        env_prefix="LOG_",
+        case_sensitive=False,
+    )
+    
     level: str = Field(default="INFO", description="Log level")
     format: str = Field(default="json", description="Log format: json or detailed")
     file_enabled: bool = Field(default=True, description="Enable file logging")
@@ -21,6 +26,11 @@ class LoggingConfig(BaseSettings):
 class EunomiaConfig(BaseSettings):
     """Eunomia authorization configuration."""
     
+    model_config = SettingsConfigDict(
+        env_prefix="EUNOMIA_",
+        case_sensitive=False,
+    )
+    
     server_url: str = Field(default="http://localhost:8000", description="Eunomia authorization server URL")
     policies_file: str = Field(default="configs/eunomia_policies.json", description="Path to policies file")
     timeout: int = Field(default=30, description="Request timeout in seconds")
@@ -29,6 +39,11 @@ class EunomiaConfig(BaseSettings):
 
 class McpServerConfig(BaseSettings):
     """MCP server configuration."""
+    
+    model_config = SettingsConfigDict(
+        env_prefix="MCP_SERVER_",
+        case_sensitive=False,
+    )
     
     name: str = Field(default="template-mcp", description="Server name")
     version: str = Field(default="0.1.0", description="Server version")
@@ -45,6 +60,7 @@ class AppConfig(BaseSettings):
         env_file_encoding="utf-8",
         env_nested_delimiter="__",
         case_sensitive=False,
+        extra="ignore",  # Ignore extra fields instead of forbidding them
     )
     
     # Environment

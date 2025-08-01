@@ -22,7 +22,7 @@ class TestTemplateMcpServer:
         return config
     
     @patch('template_mcp.server.FastMCP')
-    @patch('template_mcp.server.EunomiaMcpMiddleware')
+    @patch('template_mcp.server.EunomiaAuthMiddleware')
     def test_server_initialization(self, mock_middleware, mock_fastmcp, mock_config):
         """Test server initialization."""
         # Mock FastMCP instance
@@ -52,7 +52,7 @@ class TestTemplateMcpServer:
         assert server.request_count == 0
     
     @patch('template_mcp.server.FastMCP')
-    @patch('template_mcp.server.EunomiaMcpMiddleware')
+    @patch('template_mcp.server.EunomiaAuthMiddleware')
     def test_tools_registration(self, mock_middleware, mock_fastmcp, mock_config):
         """Test that tools are registered during initialization."""
         mock_app = MagicMock()
@@ -72,7 +72,7 @@ class TestTemplateMcpServer:
         assert "server_info" in tool_names
     
     @patch('template_mcp.server.FastMCP')
-    @patch('template_mcp.server.EunomiaMcpMiddleware')
+    @patch('template_mcp.server.EunomiaAuthMiddleware')
     @pytest.mark.asyncio
     async def test_hello_tool_success(self, mock_middleware, mock_fastmcp, mock_config):
         """Test successful hello tool execution."""
@@ -105,7 +105,7 @@ class TestTemplateMcpServer:
         assert server.request_count == 1
     
     @patch('template_mcp.server.FastMCP')
-    @patch('template_mcp.server.EunomiaMcpMiddleware')
+    @patch('template_mcp.server.EunomiaAuthMiddleware')
     @pytest.mark.asyncio
     async def test_hello_tool_different_languages(self, mock_middleware, mock_fastmcp, mock_config):
         """Test hello tool with different languages."""
@@ -136,7 +136,7 @@ class TestTemplateMcpServer:
             assert expected_greeting in result["content"][0]["text"]
     
     @patch('template_mcp.server.FastMCP')
-    @patch('template_mcp.server.EunomiaMcpMiddleware')
+    @patch('template_mcp.server.EunomiaAuthMiddleware')
     @pytest.mark.asyncio
     async def test_hello_tool_json_format(self, mock_middleware, mock_fastmcp, mock_config):
         """Test hello tool with JSON format."""
@@ -162,7 +162,7 @@ class TestTemplateMcpServer:
         assert "language" in response_text
     
     @patch('template_mcp.server.FastMCP')
-    @patch('template_mcp.server.EunomiaMcpMiddleware')
+    @patch('template_mcp.server.EunomiaAuthMiddleware')
     @pytest.mark.asyncio
     async def test_hello_tool_error_handling(self, mock_middleware, mock_fastmcp, mock_config):
         """Test hello tool error handling."""
@@ -188,7 +188,7 @@ class TestTemplateMcpServer:
         assert result.get("isError") is True
     
     @patch('template_mcp.server.FastMCP')
-    @patch('template_mcp.server.EunomiaMcpMiddleware')
+    @patch('template_mcp.server.EunomiaAuthMiddleware')
     @pytest.mark.asyncio
     async def test_server_info_tool(self, mock_middleware, mock_fastmcp, mock_config):
         """Test server info tool."""
@@ -217,7 +217,7 @@ class TestTemplateMcpServer:
         assert "uptime_seconds" in response_text
     
     @patch('template_mcp.server.FastMCP')
-    @patch('template_mcp.server.EunomiaMcpMiddleware')
+    @patch('template_mcp.server.EunomiaAuthMiddleware')
     def test_get_server_stats(self, mock_middleware, mock_fastmcp, mock_config):
         """Test server statistics."""
         mock_app = MagicMock()
