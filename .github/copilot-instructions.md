@@ -1,18 +1,85 @@
-Utilize o uv como gerenciador de pacotes para instalar o Copilot CLI. O uv é uma ferramenta que facilita a instalação e o gerenciamento de pacotes no ambiente de desenvolvimento.
-Antes de iniciar as tarefcas do ./Task.md, verifique se não há PRs já aprovados ou issues abertas relacionadas às tarefas que você pretende realizar. Isso ajuda a evitar duplicação de esforços e garante que você esteja trabalhando na versão mais atualizada do projeto. Se o PR estiver aprovado, faça um squash merge para manter o histórico de commits limpo e organizado na main branch (utilize o mcp do github para isso). Após tudo, atualize seu branch local com as últimas alterações da main branch para garantir que você esteja trabalhando com a versão mais recente do código.
-Ao seguir as instruções do ./Task.md, ao executar uma task, apenas execute uma task por vez e antes de finalizar a task, certifique-se de que todos os passos foram concluídos com sucesso.
-Esse projeto utiliza o github e se tornará publico, portanto, é importante seguir as melhores práticas de segurança e documentação.
-utilize o MCP do github para abrir issues e pull requests, garantindo que todas as alterações sejam rastreáveis e revisadas adequadamente.
-Nunca realizar alterações diretamente no branch principal (main/master). Sempre crie um branch separado para cada feature ou correção, e faça pull requests para revisão antes de mesclar as alterações.
-Siga as convenções de commit:
-- Use mensagens de commit claras e descritivas.
-- Use o formato `feat(nova-funcionalidade):`, `fix(correção):`, `docs(documentação):`, `style(estilo):`, `refactor(refatoração):`, `test(teste):`, `chore(tarefas):` para categorizar os commits.
-- Mantenha os commits pequenos e focados em uma única tarefa ou correção.
+# GitHub Copilot Instructions
 
-Nas branchs realize quantos commits forem necessários para concluir a tarefa, mas evite commits desnecessários ou vazios. Cada commit deve representar uma mudança significativa e funcional no código.
-- Após concluir uma tarefa, faça um pull request para o branch principal, solicitando revisão e aprovação antes de mesclar as alterações.
-Os pull requests devem ser claros e descritivos, explicando as alterações feitas e o motivo delas.
-O commmit sempre deve ser feito em inglês, e as mensagens devem ser claras e descritivas, seguindo o padrão de commit do projeto.
-A codebase e docstrings devem ser escritas em inglês, garantindo que sejam compreensíveis para uma audiência global.
-Garanta documentação multilíngue, se necessário, mas o código e as mensagens de commit devem ser sempre em inglês.
-O projeto é brasileiro então os PRs e issues podem ser abertos em português, mas o código e as mensagens de commit devem ser sempre em inglês.
+## Project Overview
+This project is a secure MCP (Model Context Protocol) server using FastMCP and Eunomia Authorization. It will become public, so follow security and documentation best practices.
+
+## Package Management
+- **Use uv**: Use `uv` as the package manager for all Python dependencies and tool installations
+- **Python Version**: Requires Python >= 3.12 as specified in pyproject.toml
+
+## Workflow and Task Management
+
+### Pre-Task Checklist
+Before starting tasks from `./Task.md`:
+1. Check for existing approved PRs related to your intended work
+2. Review open issues to avoid duplication of effort
+3. If approved PRs exist, perform squash merge using GitHub MCP tools
+4. Update local branch with latest changes from main branch
+
+### Task Execution Rules
+- **One task at a time**: Execute only one task from `./Task.md` at a time
+- **Complete verification**: Ensure all steps are successfully completed before marking task as done
+- **Use GitHub MCP**: Utilize GitHub MCP tools for opening issues and pull requests
+
+## Git Workflow
+
+### Branch Management
+- **Never commit directly to main/master**: Always create separate branches for features or fixes
+- **Branch naming**: Use descriptive branch names (e.g., `feat/setup-mcp-server`, `fix/auth-middleware`)
+- **Pull requests required**: All changes must go through PR review process
+
+### Commit Conventions
+Follow conventional commits format with English messages:
+
+**Format**: `<type>(<scope>): <description>`
+
+**Types**:
+- `feat`: New features
+- `fix`: Bug fixes  
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, etc.)
+- `refactor`: Code refactoring
+- `test`: Adding or modifying tests
+- `chore`: Maintenance tasks
+
+**Examples**:
+```
+feat(auth): add Eunomia middleware integration
+fix(config): resolve environment variable loading issue
+docs(api): update FastMCP tool documentation
+test(security): add authorization policy tests
+```
+
+**Commit Guidelines**:
+- Keep commits small and focused on single changes
+- Use clear, descriptive English messages
+- Make meaningful commits that represent functional changes
+- Avoid empty or unnecessary commits
+
+### Pull Request Standards
+- **Clear descriptions**: Explain changes made and reasoning
+- **Request reviews**: Always request review before merging
+- **Squash merge**: Use squash merge to maintain clean commit history on main branch
+
+## Language and Documentation Standards
+
+### Code and Technical Content
+- **English only**: All code, comments, docstrings, and commit messages must be in English
+- **Global audience**: Ensure code is understandable to international developers
+- **Documentation**: Maintain comprehensive documentation with examples
+
+### Issues and PRs
+- **Portuguese allowed**: Since this is a Brazilian project, issues and PRs can be written in Portuguese
+- **Clear communication**: Use the language that best communicates the issue or change
+
+## Security and Best Practices
+- **Public repository**: Follow security best practices as this will be a public project
+- **No sensitive data**: Never commit secrets, API keys, or sensitive information
+- **Audit trail**: Ensure all changes are traceable through proper Git workflow
+- **Testing**: Maintain test coverage and validate security implementations
+
+## MCP-Specific Guidelines
+- **FastMCP framework**: Use FastMCP as the base framework for MCP server implementation
+- **Eunomia Authorization**: Implement granular access control using Eunomia Authorization system
+- **JSON policies**: Configure authorization policies using JSON format
+- **Audit logging**: Implement comprehensive logging for security auditing
