@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "policies": [
+    {
+      "id": "admin_policy",
+      "description": "Full access for administrators",
+      "subjects": ["admin"],
+      "actions": ["*"],
+      "resources": ["*"],
+      "effect": "allow"
+    },
+    {
+      "id": "user_policy", 
+      "description": "Limited access for regular users",
+      "subjects": ["user"],
+      "actions": ["read", "list"],
+      "resources": ["tools/*", "resources/*"],
+      "effect": "allow"
+    },
+    {
+      "id": "guest_policy",
+      "description": "Read-only access for guests",
+      "subjects": ["guest"],
+      "actions": ["list"],
+      "resources": ["tools/hello"],
+      "effect": "allow"
+    }
+  ]
+}
