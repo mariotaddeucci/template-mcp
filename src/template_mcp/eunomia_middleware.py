@@ -1,8 +1,7 @@
 """Eunomia authorization middleware for FastMCP integration."""
 
-import asyncio
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 import httpx
 import mcp.types as mt
@@ -17,7 +16,7 @@ logger = logging.getLogger(__name__)
 class EunomiaAuthMiddleware(Middleware):
     """Custom Eunomia authorization middleware for FastMCP."""
 
-    def __init__(self, config: Optional[AppConfig] = None):
+    def __init__(self, config: AppConfig | None = None):
         """Initialize the Eunomia middleware."""
         super().__init__()
         self.config = config
@@ -48,22 +47,17 @@ class EunomiaAuthMiddleware(Middleware):
             user_id=user_id,
             agent_id=agent_id,
             action="tools/call",
-            resource_attrs={"tool_name": tool_name}
+            resource_attrs={"tool_name": tool_name},
         )
 
         if not is_authorized:
-            logger.warning(
-                f"Tool call denied: {user_role} user {user_id} cannot call tool {tool_name}"
-            )
+            logger.warning(f"Tool call denied: {user_role} user {user_id} cannot call tool {tool_name}")
             # Return an error result instead of raising an exception
             return mt.CallToolResult(
                 content=[
-                    mt.TextContent(
-                        type="text",
-                        text=f"Access denied: {user_role} users cannot call tool '{tool_name}'"
-                    )
+                    mt.TextContent(type="text", text=f"Access denied: {user_role} users cannot call tool '{tool_name}'")
                 ],
-                isError=True
+                isError=True,
             )
 
         logger.info(f"Tool call authorized: {user_role} user {user_id} calling tool {tool_name}")
@@ -94,17 +88,16 @@ class EunomiaAuthMiddleware(Middleware):
                 user_id=user_id,
                 agent_id=agent_id,
                 action="tools/list",
-                resource_attrs={"tool_name": tool.name}
+                resource_attrs={"tool_name": tool.name},
             )
-            
+
             if is_authorized:
                 authorized_tools.append(tool)
 
         logger.info(
-            f"Tools filtered for {user_role} user {user_id}: "
-            f"{len(authorized_tools)}/{len(all_tools)} tools visible"
+            f"Tools filtered for {user_role} user {user_id}: {len(authorized_tools)}/{len(all_tools)} tools visible"
         )
-        
+
         return authorized_tools
 
     async def on_read_resource(
@@ -130,20 +123,18 @@ class EunomiaAuthMiddleware(Middleware):
             user_id=user_id,
             agent_id=agent_id,
             action="resources/read",
-            resource_attrs={"resource_path": resource_uri}
+            resource_attrs={"resource_path": resource_uri},
         )
 
         if not is_authorized:
-            logger.warning(
-                f"Resource read denied: {user_role} user {user_id} cannot read {resource_uri}"
-            )
+            logger.warning(f"Resource read denied: {user_role} user {user_id} cannot read {resource_uri}")
             # Return empty resource content with error
             return mt.ReadResourceResult(
                 contents=[
                     mt.TextResourceContents(
                         uri=resource_uri,
                         mimeType="text/plain",
-                        text="Access denied: insufficient permissions to read this resource"
+                        text="Access denied: insufficient permissions to read this resource",
                     )
                 ]
             )
@@ -155,12 +146,12 @@ class EunomiaAuthMiddleware(Middleware):
         """Extract user ID from context metadata."""
         # In a real implementation, this would extract from JWT tokens, headers, etc.
         # For now, we'll use a simple approach based on FastMCP context
-        if hasattr(context, 'fastmcp_context') and context.fastmcp_context:
+        if hasattr(context, "fastmcp_context") and context.fastmcp_context:
             # Check if there's user info in the FastMCP context
-            user_info = getattr(context.fastmcp_context, 'user_info', None)
-            if user_info and hasattr(user_info, 'id'):
+            user_info = getattr(context.fastmcp_context, "user_info", None)
+            if user_info and hasattr(user_info, "id"):
                 return user_info.id
-        
+
         # Fallback to a default user ID
         return "anonymous"
 
@@ -168,16 +159,16 @@ class EunomiaAuthMiddleware(Middleware):
         """Extract user role from context."""
         # In a real implementation, this would be extracted from authenticated context
         # For demo purposes, we'll simulate different user types
-        
-        if hasattr(context, 'fastmcp_context') and context.fastmcp_context:
+
+        if hasattr(context, "fastmcp_context") and context.fastmcp_context:
             # Check if there's role info in the FastMCP context
-            user_info = getattr(context.fastmcp_context, 'user_info', None)
-            if user_info and hasattr(user_info, 'role'):
+            user_info = getattr(context.fastmcp_context, "user_info", None)
+            if user_info and hasattr(user_info, "role"):
                 return user_info.role.lower()
-        
+
         # For demo purposes, let's simulate role extraction from the method/context
         # In a real application, this would come from authentication middleware
-        
+
         # Simulate admin access (could be based on API key, JWT claims, etc.)
         if self._is_admin_context(context):
             return "admin"
@@ -186,7 +177,7 @@ class EunomiaAuthMiddleware(Middleware):
         else:
             return "guest"
 
-    def _extract_agent_id(self, context: MiddlewareContext[Any]) -> Optional[str]:
+    def _extract_agent_id(self, context: MiddlewareContext[Any]) -> str | None:
         """Extract agent ID from context."""
         # This would typically come from X-Agent-ID header or similar
         return f"agent-{id(context)}"  # Simple unique ID for demo
@@ -204,54 +195,37 @@ class EunomiaAuthMiddleware(Middleware):
         return True  # Default to user role
 
     async def _check_authorization(
-        self,
-        user_role: str,
-        user_id: str,
-        agent_id: Optional[str],
-        action: str,
-        resource_attrs: Dict[str, Any]
+        self, user_role: str, user_id: str, agent_id: str | None, action: str, resource_attrs: dict[str, Any]
     ) -> bool:
         """Check authorization with Eunomia server."""
         try:
             check_request = {
-                "principal": {
-                    "attributes": {
-                        "role": user_role,
-                        "user_id": user_id,
-                        "agent_id": agent_id or "unknown"
-                    }
-                },
-                "resource": {
-                    "attributes": resource_attrs
-                },
-                "action": action
+                "principal": {"attributes": {"role": user_role, "user_id": user_id, "agent_id": agent_id or "unknown"}},
+                "resource": {"attributes": resource_attrs},
+                "action": action,
             }
 
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
-                    f"{self.eunomia_url}/check",
-                    json=check_request,
-                    headers={"Content-Type": "application/json"}
+                    f"{self.eunomia_url}/check", json=check_request, headers={"Content-Type": "application/json"}
                 )
-                
+
                 if response.status_code == 200:
                     result = response.json()
                     allowed = result.get("allowed", False)
                     reason = result.get("reason", "")
-                    
+
                     logger.debug(
                         f"Authorization check: action={action}, resource={resource_attrs}, "
                         f"user_role={user_role}, allowed={allowed}, reason={reason}"
                     )
-                    
+
                     return allowed
                 else:
-                    logger.error(
-                        f"Eunomia server returned status {response.status_code}: {response.text}"
-                    )
+                    logger.error(f"Eunomia server returned status {response.status_code}: {response.text}")
                     # Default to deny for security
                     return False
-                    
+
         except Exception as e:
             logger.error(f"Authorization check failed: {e}")
             # Default to deny for security
