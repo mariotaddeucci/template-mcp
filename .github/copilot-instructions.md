@@ -73,6 +73,7 @@ test(security): add authorization policy tests
 
 ### Pull Request Standards
 - **Clear descriptions**: Explain changes made and reasoning
+- **Draft to ready**: Change draft PRs to "ready for review" status before approving and merging
 - **Request reviews**: Always request review before merging
 - **Squash merge**: Use squash merge to maintain clean commit history on main branch
 
