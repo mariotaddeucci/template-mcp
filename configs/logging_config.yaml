@@ -1,0 +1,40 @@
+version: 1
+formatters:
+  json:
+    class: pythonjsonlogger.jsonlogger.JsonFormatter
+    format: '%(asctime)s %(name)s %(levelname)s %(message)s'
+  detailed:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: json
+    stream: ext://sys.stdout
+
+  file:
+    class: logging.FileHandler
+    level: INFO
+    formatter: detailed
+    filename: logs/mcp_server.log
+
+loggers:
+  template_mcp:
+    level: DEBUG
+    handlers: [console, file]
+    propagate: false
+
+  fastmcp:
+    level: INFO
+    handlers: [console]
+    propagate: false
+
+  eunomia:
+    level: INFO
+    handlers: [console]
+    propagate: false
+
+root:
+  level: WARNING
+  handlers: [console]

@@ -1,0 +1,32 @@
+services:
+  eunomia-server:
+    image: ttommitt/eunomia-server:latest
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mcp-network
+
+  mcp-server:
+    build: 
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - EUNOMIA_SERVER_URL=http://eunomia-server:8000
+      - ENVIRONMENT=development
+    depends_on:
+      - eunomia-server
+    networks:
+      - mcp-network
+    volumes:
+      - ../logs:/app/logs
+
+networks:
+  mcp-network:
+    driver: bridge
