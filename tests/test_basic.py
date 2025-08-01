@@ -21,14 +21,14 @@ def test_main_imports():
     """Test that main components can be imported."""
     from template_mcp import (
         AppConfig,
-        get_config,
         HelloRequest,
         HelloResponse,
         TemplateMcpServer,
         ToolStatus,
         UserRole,
+        get_config,
     )
-    
+
     # Test that classes can be instantiated
     assert AppConfig is not None
     assert get_config() is not None
@@ -43,7 +43,7 @@ def test_main_imports():
 async def test_main_function_import():
     """Test that main function can be imported."""
     from template_mcp import main, sync_main
-    
+
     assert main is not None
     assert sync_main is not None
     # Note: We don't actually run main() as it would start the server
