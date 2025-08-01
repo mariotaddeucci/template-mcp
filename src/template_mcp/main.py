@@ -3,10 +3,9 @@
 import asyncio
 import os
 import sys
-from pathlib import Path
 
 from .config import load_config
-from .logging import setup_logging, log_startup, log_shutdown
+from .logging import log_shutdown, log_startup, setup_logging
 from .server import run_server
 
 
@@ -16,20 +15,20 @@ async def main() -> None:
         # Load configuration
         environment = os.getenv("ENVIRONMENT", "development")
         config = load_config(environment)
-        
+
         # Setup logging
         setup_logging(config.logging)
-        
+
         # Log startup
         log_startup(
             config.mcp_server.name,
             config.mcp_server.version,
             config.mcp_server.port,
         )
-        
+
         # Run the server
         await run_server(config)
-        
+
     except KeyboardInterrupt:
         print("\nReceived interrupt signal")
     except Exception as e:
@@ -37,7 +36,7 @@ async def main() -> None:
         sys.exit(1)
     finally:
         # Log shutdown
-        if 'config' in locals():
+        if "config" in locals():
             log_shutdown(config.mcp_server.name)
 
 

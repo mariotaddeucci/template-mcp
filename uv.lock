@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.12"
 
 [[package]]
@@ -1731,6 +1731,7 @@ dependencies = [
     { name = "eunomia-ai" },
     { name = "eunomia-sdk" },
     { name = "fastmcp" },
+    { name = "httpx" },
     { name = "loguru" },
     { name = "pydantic" },
     { name = "python-dotenv" },
@@ -1756,6 +1757,7 @@ requires-dist = [
     { name = "eunomia-ai", specifier = ">=0.3.9" },
     { name = "eunomia-sdk", specifier = ">=0.3.9" },
     { name = "fastmcp", specifier = ">=2.10.6" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "loguru" },
     { name = "pre-commit", marker = "extra == 'dev'" },
     { name = "pydantic", specifier = ">=2.0.0" },

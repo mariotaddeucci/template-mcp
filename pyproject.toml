@@ -29,6 +29,7 @@ dependencies = [
     "python-json-logger",
     "loguru",
     "structlog",
+    "httpx>=0.28.1",
 ]
 
 [project.optional-dependencies]
