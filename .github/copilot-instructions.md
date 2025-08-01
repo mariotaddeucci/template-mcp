@@ -11,3 +11,8 @@ Siga as convenções de commit:
 
 Nas branchs realize quantos commits forem necessários para concluir a tarefa, mas evite commits desnecessários ou vazios. Cada commit deve representar uma mudança significativa e funcional no código.
 - Após concluir uma tarefa, faça um pull request para o branch principal, solicitando revisão e aprovação antes de mesclar as alterações.
+Os pull requests devem ser claros e descritivos, explicando as alterações feitas e o motivo delas.
+O commmit sempre deve ser feito em inglês, e as mensagens devem ser claras e descritivas, seguindo o padrão de commit do projeto.
+A codebase e docstrings devem ser escritas em inglês, garantindo que sejam compreensíveis para uma audiência global.
+Garanta documentação multilíngue, se necessário, mas o código e as mensagens de commit devem ser sempre em inglês.
+O projeto é brasileiro então os PRs e issues podem ser abertos em português, mas o código e as mensagens de commit devem ser sempre em inglês.
