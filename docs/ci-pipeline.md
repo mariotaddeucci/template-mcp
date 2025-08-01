@@ -2,6 +2,15 @@
 
 Este projeto utiliza GitHub Actions para automatizar a execução de todos os comandos de verificação através de `uv run task`. A pipeline está configurada para rodar verificações em paralelo para melhor performance.
 
+## Status Badges
+
+Para exibir o status da CI no README, adicione:
+
+```markdown
+[![CI Pipeline](https://github.com/mariotaddeucci/template-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/mariotaddeucci/template-mcp/actions/workflows/ci.yml)
+[![Comprehensive Tests](https://github.com/mariotaddeucci/template-mcp/actions/workflows/comprehensive.yml/badge.svg)](https://github.com/mariotaddeucci/template-mcp/actions/workflows/comprehensive.yml)
+```
+
 ## Workflows Configurados
 
 ### 1. `ci.yml` - Pipeline Principal

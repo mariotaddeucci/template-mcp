@@ -45,6 +45,8 @@ template-mcp/
 
 O projeto utiliza GitHub Actions para automação completa das verificações de código. Ver [documentação da pipeline](docs/ci-pipeline.md) para detalhes.
 
+[![CI Pipeline](https://github.com/mariotaddeucci/template-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/mariotaddeucci/template-mcp/actions/workflows/ci.yml)
+
 ### Verificações Automatizadas
 - ✅ Formatação de código (Ruff)
 - ✅ Linting e análise estática (Ruff)  
